@@ -1,0 +1,1 @@
+#ifndef __SKHL_COMM_APP_H__#define __SKHL_COMM_APP_H__typedef struct{    const char *port;    uint8_t rule;       // PC or Board.} comm_user_config_t;skhl_result skhl_comm_init(void *usr_config);skhl_result skhl_comm_destory(void);#endif
