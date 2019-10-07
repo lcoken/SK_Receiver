@@ -21,7 +21,7 @@ enum LOG_LEVEL {
     LOG_LEVEL_ALL,
 };
 
-static uint32_t log_level = LOG_LEVEL_ALL;
+static uint32_t log_level = LOG_LEVEL_ERR;
 
 #define NONE            "\033[m"
 #define RED             "\033[0;32;31m"

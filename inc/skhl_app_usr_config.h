@@ -1,7 +1,7 @@
 #ifndef __SKHL_APP_USR_CONFIG_H__
 #define __SKHL_APP_USR_CONFIG_H__
 
-#define USER_CONFIG_FILE_NAME "sk.dat"
+#define USER_CONFIG_FILE_NAME "/usr/local/bin/sk.dat"
 
 #define USER_KEY_LEN        6
 #define USER_SECRET_LEN     64
