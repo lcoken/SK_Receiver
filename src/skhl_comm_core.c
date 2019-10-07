@@ -53,13 +53,31 @@ static skhl_result skhl_find_link(skhl_local_pack_attr_t *attr, uint8_t *link)
     skhl_local_pack_attr_t *attr_local       = attr;
     skhl_comm_router_t *router              = context->router;
 
-    for (uint8_t i = 0; i < context->router_size; i++)
+    if (attr->version == COMM_PROTOCOL_RAW)
     {
-        if (attr_local->target == router[i].target)
+        for (uint8_t i = 0; i < context->router_size; i++)
         {
-            *link = router[i].link_device;
-            return 0;
+            if (COMM_TARGET_ID_PC == router[i].target)
+            {
+                *link = router[i].link_device;
+                return 0;
+            }
         }
+    }
+    else if (attr->version == COMM_PROTOCOL_V0)
+    {
+        for (uint8_t i = 0; i < context->router_size; i++)
+        {
+            if (attr_local->target == router[i].target)
+            {
+                *link = router[i].link_device;
+                return 0;
+            }
+        }
+    }
+    else
+    {
+        log_err("Comm pack version not support!(pack ver = %d)\n", attr->version);
     }
 
     return -1;
@@ -108,8 +126,27 @@ static skhl_result skhl_pack_data(uint8_t *data, skhl_local_pack_attr_t *attr, u
 
         *real_size = SKHL_PACK_LEN(attr->data_len);
     }
+    else if (attr->version == COMM_PROTOCOL_RAW)
+    {
+        skhl_pack_raw_pack_t *package = (skhl_pack_raw_pack_t *)data;
+
+        if ((attr->data_len !=  0) && (attr->data != NULL))
+        {
+            if (attr->data_len <= SKHL_RAW_PAYLOAD_MAX_LEN)
+            {
+                memcpy(package->data, attr->data, attr->data_len);
+            }
+            else
+            {
+                log_err("Potocol RAW only support %d bytes Max!\n", SKHL_RAW_PAYLOAD_MAX_LEN);
+                return -1;
+            }
+            *real_size = attr->data_len;
+        }
+    }
     else
     {
+        *real_size = 0;
         log_err("Potocol not support!\n");
         return -1;
     }

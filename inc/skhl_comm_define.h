@@ -2,7 +2,7 @@
 #define __SKHL_COMM_DEFINE_H__
 
 #define COMM_PROTOCOL_V0        0
-#define COMM_PROTOCOL_V1        1
+#define COMM_PROTOCOL_RAW       1
 
 #define CMD_SET_COMMON  0
 
@@ -34,6 +34,8 @@
 #define SKHL_PACK_LEN(len)      (sizeof(skhl_pack_v0_head_t) + sizeof(skhl_pack_v0_attr_t) + len + 2)
 #define SKHL_DATA_LEN(len)      (len - sizeof(skhl_pack_v0_head_t) - sizeof(skhl_pack_v0_attr_t) - 2)
 #define SKHL_V0_PAYLOAD_MAX_LEN (PACK_MAX_LEN - (sizeof(skhl_pack_v0_head_t) + sizeof(skhl_pack_v0_attr_t) + 2))
+#define SKHL_RAW_PAYLOAD_MAX_LEN (PACK_MAX_LEN)
+
 
 #define UPGRADE_SUCCESS     0xAA
 #define UPGRADE_FAILED      0x55
@@ -83,6 +85,11 @@ typedef struct
 
     uint8_t             data[SKHL_V0_PAYLOAD_MAX_LEN];
 } skhl_pack_v0_pack_t;
+
+typedef struct
+{
+    uint8_t             data[SKHL_RAW_PAYLOAD_MAX_LEN];
+} skhl_pack_raw_pack_t;
 
 // for app layer
 typedef struct

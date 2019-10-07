@@ -8,6 +8,9 @@
 #include "skhl_data_typedef.h"
 #include "skhl_hal_uart.h"
 #include "skhl_app_usr_config.h"
+#include "skhl_comm_define.h"
+#include "skhl_comm_core.h"
+#include "skhl_comm_uart.h"
 
 #define GGA_STR_MAX_LEN     512
 #define DEMO_GGA_STR        "$GPGGA,000001,3112.518576,N,12127.901251,E,1,8,1,0,M,-32,M,3,0*4B"
@@ -83,6 +86,19 @@ static qxwz_void_t demo_on_data(qxwz_uint32_t type, const qxwz_void_t *data, qxw
     }
 }
 
+static skhl_result comm_send_gpgga_data(uint8_t *buff, uint32_t len)
+{
+    skhl_local_pack_attr_t pack_attr  = {0};
+    skhl_result ret             = 0;
+
+    pack_attr.data      = buff;
+    pack_attr.data_len  = len;
+    pack_attr.version   = COMM_PROTOCOL_RAW;
+    ret = skhl_comm_send_data(&pack_attr);
+
+    return ret;
+}
+
 typedef enum
 {
     SDK_STARTUP = 0,
@@ -134,11 +150,14 @@ static void sdk_refresh_gga(char *usr_key,
                     {
                         data_size = skhl_hal_uart_read_data(gga_handle,
                                                 (uint8_t *)gga_data_tmp, GGA_STR_MAX_LEN);
-                        if (data_size != 0)
+                        if (data_size > 0)
                         {
                            skhl_print_str("Read GGA:", (uint8_t *)gga_data, data_size);
                            /* upload GGA */
                            memcpy(gga_data, gga_data_tmp, GGA_STR_MAX_LEN);
+
+                           // Send gpgga data to USER port.
+                           comm_send_gpgga_data(gga_data_tmp, data_size);
                         }
                     }
 
