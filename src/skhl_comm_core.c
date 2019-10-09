@@ -408,7 +408,7 @@ static void* skhl_phrase_core(void *p)
             continue;
         }
 
-        log_info("get event!\n");
+        log_debug("get event!\n");
         phrase_data();
     }
     log_warn("Thread (%s) exit...\n", __FUNCTION__);
@@ -452,7 +452,7 @@ static void* read_data_core(void *p)
                 }
             }
         }
-        skhl_sleep(1000);
+        skhl_sleep(2000);
     }
 
     log_warn("Thread (%s) exit...\n", __FUNCTION__);

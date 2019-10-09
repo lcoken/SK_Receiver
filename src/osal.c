@@ -203,7 +203,7 @@ skhl_result file_read(skhl_handle file, uint8_t *buff, uint32_t size, int32_t *r
     *real_size = read((*(int *)file), buff, size);
     if (*real_size < 0)
     {
-        // log_err("read size = %d\n", *real_size);
+        log_warn("read size = %d\n", *real_size);
         return -1;
     }
 
@@ -215,7 +215,7 @@ skhl_result file_write(skhl_handle file, uint8_t *buff, uint32_t size, int32_t *
     *real_size = write((*(int *)file), buff, size);
     if (*real_size < 0)
     {
-        log_err("write size = %d\n", *real_size);
+        log_warn("write size = %d\n", *real_size);
         return -1;
     }
 

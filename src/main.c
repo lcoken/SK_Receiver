@@ -83,17 +83,12 @@ int main(int32_t argc, char **argv)
 
     setting_ctx.setting_ing = FALSE;
 
-    log_info("user setting  :\n");
-    skhl_print_str("user key : ", usr_setting.usr_key, USER_KEY_LEN);
-    skhl_print_str("user secret : ", usr_setting.usr_secret, USER_SECRET_LEN);
-    skhl_print_str("user dev id : ", usr_setting.dev_id, USER_DEVICE_ID_LEN);
-    skhl_print_str("user dev type : ", usr_setting.dev_type, USER_DEVICE_TYPE_LEN);
-
-    log_info("user key      : %s\n", usr_setting.usr_key);
-    log_info("user secret   : %s\n", usr_setting.usr_secret);
-    log_info("user dev id   : %s\n", usr_setting.dev_id);
-    log_info("user dev type : %s\n", usr_setting.dev_type);
-    log_info("\nGGA port      : %s!\n", gga_port);
+    log_err("user setting  :\n");
+    log_err("user key      : %.6s\n", usr_setting.usr_key);
+    log_err("user secret   : %.64s\n", usr_setting.usr_secret);
+    log_err("user dev id   : %.32s\n", usr_setting.dev_id);
+    log_err("user dev type : %.32s\n\n", usr_setting.dev_type);
+    log_err("GGA port      : %s!\n", gga_port);
 
     sdk_startup((char *)gga_port,
                 usr_setting.usr_key,

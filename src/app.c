@@ -15,7 +15,8 @@
 #define GGA_STR_MAX_LEN     512
 #define DEMO_GGA_STR        "$GPGGA,000001,3112.518576,N,12127.901251,E,1,8,1,0,M,-32,M,3,0*4B"
 
-#define DEMO_LOG(fmt, ...)  log_info("[DEMO]"fmt, ##__VA_ARGS__)
+#define DEMO_LOG(fmt, ...)  log_info("[SK_receiver]"fmt, ##__VA_ARGS__)
+#define DEMO_PRINT(fmt, ...) log_err("[SK_receiver] "fmt, ##__VA_ARGS__)
 
 
 static qxwz_uint32_t sdk_auth_flag = 0;
@@ -33,9 +34,9 @@ static qxwz_void_t demo_show_caps(qxwz_sdk_cap_info_t *cap_info)
 {
     qxwz_int32_t loop = 0;
 
-    DEMO_LOG("total capabilities: %d\n", cap_info->caps_num);
+    DEMO_PRINT("total capabilities: %d\n", cap_info->caps_num);
     for (loop = 0; loop < cap_info->caps_num; ++loop) {
-        DEMO_LOG("idx: %d, cap_id: %u, state: %d, act_method: %d, expire_time: %llu\n",
+        DEMO_PRINT("idx: %d, cap_id: %u, state: %d, act_method: %d, expire_time: %llu\n",
             loop + 1,
             cap_info->caps[loop].cap_id,
             cap_info->caps[loop].state,
@@ -49,30 +50,30 @@ static qxwz_void_t demo_on_auth(qxwz_int32_t status_code, qxwz_sdk_cap_info_t *c
         sdk_auth_flag = 1;
         sdk_cap_info = *cap_info;
         demo_show_caps(cap_info);
-        DEMO_LOG("auth successfully!\n");
+        DEMO_PRINT("auth successfully!\n");
     } else {
-        DEMO_LOG("auth failed, code=%d\n", status_code);
+        DEMO_PRINT("auth failed, code=%d\n", status_code);
     }
 }
 
 static qxwz_void_t demo_on_start(qxwz_int32_t status_code, qxwz_uint32_t cap_id) {
-    DEMO_LOG("on start cap:status_code=%d, cap_id=%d\n", status_code, cap_id);
+    DEMO_PRINT("on start cap:status_code=%d, cap_id=%d\n", status_code, cap_id);
     sdk_start_flag = 1;
 }
 
 
 static qxwz_void_t demo_on_status(int code)
 {
-    DEMO_LOG(" on status code: %d\n", code);
+    DEMO_PRINT(" on status code: %d\n", code);
 }
 
 static qxwz_void_t demo_on_data(qxwz_uint32_t type, const qxwz_void_t *data, qxwz_uint32_t len)
 {
-    DEMO_LOG(" on data: %d, ptr: %p, len: %d\n", type, data, len);
+    DEMO_PRINT(" on data: %d, ptr: %p, len: %d\n", type, data, len);
 
     switch (type) {
         case QXWZ_SDK_DATA_TYPE_RAW_NOSR:
-            DEMO_LOG("QXWZ_SDK_DATA_TYPE_RAW_NOSR\n");
+            DEMO_PRINT("QXWZ_SDK_DATA_TYPE_RAW_NOSR\n");
             skhl_print_str("Write GGA:", (uint8_t *)data, (uint32_t)len);
 
             if (gga_handle != NULL &&
@@ -82,7 +83,7 @@ static qxwz_void_t demo_on_data(qxwz_uint32_t type, const qxwz_void_t *data, qxw
             }
             break;
         default:
-            DEMO_LOG("unknown type: %d\n", type);
+            DEMO_PRINT("unknown type: %d\n", type);
     }
 }
 
@@ -118,15 +119,16 @@ static void sdk_refresh_gga(char *usr_key,
     sdk_step_e          step        = SDK_STARTUP;
 
     sdk_config.key_type = QXWZ_SDK_KEY_TYPE_AK;
-    strcpy(sdk_config.key, usr_key);
-    strcpy(sdk_config.secret, usr_secret);
-    strcpy(sdk_config.dev_id, dev_id);
-    strcpy(sdk_config.dev_type, dev_type);
 
-    DEMO_LOG("user app key: #%s#\n", usr_key);
-    DEMO_LOG("user app secret: #%s#\n", usr_secret);
-    DEMO_LOG("user dev id: #%s#\n", dev_id);
-    DEMO_LOG("user dev type: #%s#\n", dev_type);
+    strncpy(sdk_config.key, usr_key, 6);
+    strncpy(sdk_config.secret, usr_secret, 64);
+    strncpy(sdk_config.dev_id, dev_id, 32);
+    strncpy(sdk_config.dev_type, dev_type, 32);
+
+    DEMO_PRINT("user app key:    #%s#\n", sdk_config.key);
+    DEMO_PRINT("user app secret: #%s#\n", sdk_config.secret);
+    DEMO_PRINT("user dev id:     #%s#\n", sdk_config.dev_id);
+    DEMO_PRINT("user dev type:   #%s#\n", sdk_config.dev_type);
 
     sdk_config.status_cb    = demo_on_status;
     sdk_config.data_cb      = demo_on_data;
@@ -164,7 +166,7 @@ static void sdk_refresh_gga(char *usr_key,
                     if ((tick++ % 10) == 0)
                     {
                         qxwz_sdk_upload_gga(gga_data, strlen(gga_data));
-                        DEMO_LOG("uploading gga data: %s ...\n", gga_data);
+                        DEMO_PRINT("uploading gga data: %s ...\n", gga_data);
                     }
 
                     gettimeofday(&tval, NULL);
@@ -174,7 +176,7 @@ static void sdk_refresh_gga(char *usr_key,
                     if (sdk_auth_flag > 0) {
                         sdk_auth_flag = 0;
                         if (sdk_cap_info.caps_num > 0) {
-                            DEMO_LOG("starting sdk capability...\n");
+                            DEMO_PRINT("starting sdk capability...\n");
                             qxwz_sdk_start(QXWZ_SDK_CAP_ID_NOSR);   /* start NOSR capability */
                         }
                     }
@@ -226,7 +228,7 @@ void sdk_startup(char *gga_port,
         gga_handle = skhl_hal_uart_init(gga_port);
         if (gga_handle == NULL)
         {
-            DEMO_LOG("hal uart init %s failed!\n", gga_port);
+            DEMO_PRINT("hal uart init %s failed!\n", gga_port);
             return;
         }
 
